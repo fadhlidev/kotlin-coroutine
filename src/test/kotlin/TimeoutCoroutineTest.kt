@@ -1,7 +1,7 @@
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.Test
 
-class TimeoutCoroutine {
+class TimeoutCoroutineTest {
 
     @Test
     @OptIn(DelicateCoroutinesApi::class)
