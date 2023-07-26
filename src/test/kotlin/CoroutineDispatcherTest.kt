@@ -81,4 +81,25 @@ class CoroutineDispatcherTest {
         }
     }
 
+    @Test
+    @OptIn(DelicateCoroutinesApi::class)
+    fun `switching context or dispatcher test`() {
+        val serviceDispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
+
+        runBlocking {
+            val job = GlobalScope.launch(Dispatchers.IO) {
+                println("[Step 1] Thread running for job: ${Thread.currentThread().name}")
+
+                // To switch context/dispatcher, use `withContext` function
+                withContext(serviceDispatcher) {
+                    println("[Step 2] Thread running for job: ${Thread.currentThread().name}")
+                }
+
+                println("[Step 3] Thread running for job: ${Thread.currentThread().name}")
+            }
+
+            job.join()
+        }
+    }
+
 }
