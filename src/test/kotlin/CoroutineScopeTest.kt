@@ -162,4 +162,34 @@ class CoroutineScopeTest {
         }
     }
 
+    @Test
+    fun `coroutine with name test`() {
+        // Set a name of a scope
+        val scope = CoroutineScope(Dispatchers.IO + CoroutineName("Parent"))
+
+        val job1 = scope.launch {
+            delay(1_000)
+            println("Job #1 runs on thread: ${Thread.currentThread().name}")
+        }
+
+        // Set a name of a coroutine
+        val job2 = scope.launch(CoroutineName("Change Parent")) {
+            delay(2_000)
+            println("Job #2 runs on thread: ${Thread.currentThread().name}")
+        }
+
+        val job3 = scope.launch {
+            delay(3_000)
+            println("Job #3 runs on thread: ${Thread.currentThread().name}")
+
+            withContext(CoroutineName("Child")) {
+                println("Job #3 (Child) runs on thread: ${Thread.currentThread().name}")
+            }
+        }
+
+        runBlocking {
+            joinAll(job1, job2, job3)
+        }
+    }
+
 }
