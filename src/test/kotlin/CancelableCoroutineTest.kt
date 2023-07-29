@@ -65,4 +65,21 @@ class CancelableCoroutineTest {
         }
     }
 
+    @Test
+    fun `await cancellation function test`() {
+        runBlocking {
+            val job = launch {
+                try {
+                    println("Waiting the job to be cancelled...")
+                    awaitCancellation()
+                } finally {
+                    println("Job is cancelled")
+                }
+            }
+
+            delay(5_000)
+            job.cancelAndJoin()
+        }
+    }
+
 }
