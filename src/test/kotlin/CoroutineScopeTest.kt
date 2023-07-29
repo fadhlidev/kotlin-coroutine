@@ -111,4 +111,30 @@ class CoroutineScopeTest {
         }
     }
 
+    @Test
+    fun `parent child coroutine test`() {
+        val scope = CoroutineScope(Dispatchers.IO)
+
+        val job = scope.launch {
+            // Launch another coroutines inside a parent coroutine
+            launch {
+                delay(2_000)
+                println("Child coroutine #1 finished!")
+            }
+
+            launch {
+                delay(3_000)
+                println("Child coroutine #2 finished!")
+            }
+
+            delay(1_000)
+            println("Parent coroutine finished!")
+        }
+
+        runBlocking {
+            // The parent coroutine will wait all its child to finish
+            job.join()
+        }
+    }
+
 }
