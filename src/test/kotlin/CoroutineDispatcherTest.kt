@@ -102,4 +102,56 @@ class CoroutineDispatcherTest {
         }
     }
 
+    @Test
+    @OptIn(DelicateCoroutinesApi::class)
+    fun `cancel finally test`() {
+        runBlocking {
+            val job = GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    println("Start job")
+                    delay(2_000)
+                    println("End job")
+                } finally {
+                    // The status should be `false` here
+                    println("Is active: $isActive")
+
+                    // Because it is not active anymore,
+                    // this line will throw `CancellationException`
+                    delay(2_000)
+
+                    // Unreachable
+                    println("Finally")
+                }
+            }
+
+            // Cancel the job
+            job.cancelAndJoin()
+        }
+    }
+
+    @Test
+    @OptIn(DelicateCoroutinesApi::class)
+    fun `non cancelable context test`() {
+        runBlocking {
+            val job = GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    println("Start job")
+                    delay(2_000)
+                    println("End job")
+                } finally {
+                    // This coroutine is not cancellable even if its parent coroutine is canceled
+                    withContext(NonCancellable) {
+                        // `isActive` is always `true`
+                        println("Is active: $isActive")
+                        delay(2_000)
+                        println("Finally")
+                    }
+                }
+            }
+
+            // Cancel the job
+            job.cancelAndJoin()
+        }
+    }
+
 }
