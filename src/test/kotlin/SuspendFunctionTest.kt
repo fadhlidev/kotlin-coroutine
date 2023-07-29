@@ -39,4 +39,31 @@ class SuspendFunctionTest {
         }
     }
 
+    @Test
+    fun `yield function test`() {
+        runBlocking {
+            val scope = coroutineScope {
+                // These coroutine jobs will run sequentially, but...
+                launch {
+                    println("Job #1 starts on thread: ${Thread.currentThread().name}")
+
+                    // ...whenever `yield` function is called, it will yield current used thread to another coroutine
+                    yield()
+
+                    delay(2_000)
+                    println("Job #1 finished")
+                }
+
+
+                launch {
+                    println("Job #2 starts on thread: ${Thread.currentThread().name}")
+                    delay(1_000)
+                    println("Job #2 finished")
+                }
+            }
+
+            scope.join()
+        }
+    }
+
 }
