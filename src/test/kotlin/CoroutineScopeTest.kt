@@ -1,5 +1,6 @@
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.Test
+import java.util.concurrent.Executors
 import kotlin.test.assertEquals
 
 class CoroutineScopeTest {
@@ -63,6 +64,50 @@ class CoroutineScopeTest {
         runBlocking {
             val result = async { sum(100, 200) }
             assertEquals(300, result.await())
+        }
+    }
+
+    @Test
+    fun `parent child dispatcher test`() {
+        val dispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
+        val parentScope = CoroutineScope(dispatcher)
+
+        val job = parentScope.launch {
+            println("Parent scope runs on thread: ${Thread.currentThread().name}")
+
+            coroutineScope {
+                launch {
+                    // Child scope will use the same context as its parent
+                    println("Child scope runs on thread: ${Thread.currentThread().name}")
+                }
+            }
+        }
+
+        runBlocking {
+            job.join()
+        }
+    }
+
+    @Test
+    fun `parent child cancel test`() {
+        val dispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
+        val parentScope = CoroutineScope(dispatcher)
+
+        val job = parentScope.launch {
+            println("Parent scope runs on thread: ${Thread.currentThread().name}")
+
+            coroutineScope {
+                launch {
+                    delay(2_000)
+
+                    // This code is unreachable because its parent has been cancelled
+                    println("Child scope runs on thread: ${Thread.currentThread().name}")
+                }
+            }
+        }
+
+        runBlocking {
+            job.cancelAndJoin()
         }
     }
 
