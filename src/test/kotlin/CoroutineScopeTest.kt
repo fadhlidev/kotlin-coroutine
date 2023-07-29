@@ -137,4 +137,29 @@ class CoroutineScopeTest {
         }
     }
 
+    @Test
+    fun `cancelChildren test`() {
+        val scope = CoroutineScope(Dispatchers.IO)
+
+        val job = scope.launch {
+            launch {
+                delay(2_000)
+                println("Child coroutine #1 finished!")
+            }
+
+            launch {
+                delay(3_000)
+                println("Child coroutine #2 finished!")
+            }
+
+            delay(1_000)
+            println("Parent coroutine finished!")
+        }
+
+        runBlocking {
+            job.cancelChildren()
+            job.join()
+        }
+    }
+
 }
