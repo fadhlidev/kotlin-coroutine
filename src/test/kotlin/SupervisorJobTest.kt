@@ -51,4 +51,35 @@ class SupervisorJobTest {
         }
     }
 
+    @Test
+    fun `coroutine supervisor scope test`() {
+        val scope = CoroutineScope(Dispatchers.IO + Job())
+
+        val job = scope.launch {
+            println("[Parent Scope] Start Job")
+
+            // Start a coroutine scope with SupervisorJob using `supervisorScope`
+            // Every error thrown from this scope will not be propagated to its parent
+            supervisorScope {
+                launch {
+                    println("[Supervisor Scope] Start job #1")
+                    delay(3_000)
+                    println("[Supervisor Scope] Finish job #1")
+                }
+
+                launch {
+                    println("[Supervisor Scope] Start job #2")
+                    delay(1_000)
+                    throw RuntimeException()
+                }
+            }
+
+            println("[Parent Scope] Finish Job")
+        }
+
+        runBlocking {
+            job.join()
+        }
+    }
+
 }
