@@ -6,7 +6,7 @@ class FlowTest {
 
     @Test
     fun `asynchronous flow test`() {
-        // while `async` only returns a value,
+        // While `async` only returns a value,
         // `flow` can return sequence values
         val flow: Flow<Int> = flow {
             println("Start flow")
