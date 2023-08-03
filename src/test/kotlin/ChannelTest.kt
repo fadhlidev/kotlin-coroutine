@@ -1,4 +1,5 @@
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -27,6 +28,31 @@ class ChannelTest {
             joinAll(job1, job2)
 
             // Important! always close the channel
+            channel.close()
+        }
+    }
+
+    @Test
+    fun `buffered channel test`() {
+        runBlocking {
+            // Create a new buffered channel (with capacity)
+            val channel = Channel<Int>(capacity = 10)
+
+            val job1 = launch {
+                repeat(10) {
+                    println("Job 1 Send: $it")
+                    channel.send(it)
+                }
+            }
+
+            val job2 = launch {
+                repeat(10) {
+                    delay(1_000) // to simulates that receiver is slower than sender
+                    println("Job 2 Receive: ${channel.receive()}")
+                }
+            }
+
+            joinAll(job1, job2)
             channel.close()
         }
     }
