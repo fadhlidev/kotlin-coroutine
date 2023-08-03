@@ -83,4 +83,23 @@ class ChannelTest {
         }
     }
 
+    @Test
+    fun `channel undelivered element test`() {
+        runBlocking {
+            // Can add a lambda function to a channel to handle undelivered element (value)
+            val channel = Channel<Int>(Channel.UNLIMITED) {
+                println("Undelivered value $it")
+            }
+
+            // Close the channel immediately
+            channel.close()
+
+            val job = launch {
+                // Send value to closed channel
+                channel.send(100)
+            }
+
+            job.join()
+        }
+    }
 }
