@@ -1,3 +1,4 @@
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
@@ -48,6 +49,31 @@ class ChannelTest {
             val job2 = launch {
                 repeat(10) {
                     delay(1_000) // to simulates that receiver is slower than sender
+                    println("Job 2 Receive: ${channel.receive()}")
+                }
+            }
+
+            joinAll(job1, job2)
+            channel.close()
+        }
+    }
+
+    @Test
+    fun `buffer overflow channel test`() {
+        runBlocking {
+            // Create a new buffered channel with overflow action
+            val channel = Channel<Int>(capacity = 10, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+            val job1 = launch {
+                repeat(20) {
+                    println("Job 1 Send: $it")
+                    channel.send(it)
+                }
+            }
+
+            val job2 = launch {
+                repeat(10) {
+                    delay(1_000)
                     println("Job 2 Receive: ${channel.receive()}")
                 }
             }
