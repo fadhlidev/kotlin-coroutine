@@ -1,9 +1,7 @@
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.channels.produce
 import org.junit.jupiter.api.Test
 
 class ChannelTest {
@@ -102,4 +100,28 @@ class ChannelTest {
             job.join()
         }
     }
+
+    @Test
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun `produce function test`() {
+        val scope = CoroutineScope(Dispatchers.IO)
+
+        // Dedicated function to create a channel and then returns its receiver
+        val channel = scope.produce(capacity = 10) {
+            repeat(10) {
+                send(it)
+            }
+        }
+
+        val job = scope.launch {
+            repeat(10) {
+                println("Receive ${channel.receive()}")
+            }
+        }
+
+        runBlocking {
+            job.join()
+        }
+    }
+
 }
