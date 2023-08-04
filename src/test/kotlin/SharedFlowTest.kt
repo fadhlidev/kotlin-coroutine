@@ -33,7 +33,8 @@ class SharedFlowTest {
 
         scope.launch {
             sharedFlow.asSharedFlow()
-                .buffer(10).collect {
+                .buffer(10)
+                .collect {
                     delay(2_000)
                     println("Shared flow 2 receive $it")
                 }
