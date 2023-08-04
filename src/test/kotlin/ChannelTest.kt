@@ -1,8 +1,5 @@
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.channels.*
 import org.junit.jupiter.api.Test
 
 class ChannelTest {
@@ -122,6 +119,7 @@ class ChannelTest {
 
         runBlocking {
             job.join()
+            channel.cancel()
         }
     }
 
@@ -146,6 +144,24 @@ class ChannelTest {
         runBlocking {
             job.join()
             channel.close()
+        }
+    }
+
+    @Test
+    @OptIn(ObsoleteCoroutinesApi::class)
+    fun `ticker function test`() {
+        runBlocking {
+            // Create a ticker channel, it will send a tick for every specified time
+            val channel = ticker(delayMillis = 1_000)
+
+            repeat(10) {
+                // Receive tick from channel
+                channel.receive()
+
+                println("Tick $it")
+            }
+
+            channel.cancel()
         }
     }
 
